@@ -77,7 +77,6 @@ def findPath(board, walls, squares, start, end):
                 currentNode = node
                 currentIndex = index
         openSet.pop(currentIndex)
-        print(currentNode.position)
         closedSet.append(currentNode)
 
         children = []
@@ -100,16 +99,17 @@ def findPath(board, walls, squares, start, end):
             if nodePosition[0] > (squares-1) or nodePosition[0] < 0 or nodePosition[1] > (squares-1) or nodePosition[1] < 0:
                 continue
 
-            # If the currentNode is a wall, ignore it and move on
-            if currentNode in walls:
-                continue
-
             # If an adjacent square passes the two tests, make it a child of the currentNode
             newNode = Square(currentNode, nodePosition)
+
+            # If the currentNode is a wall, ignore it and move on
+            if newNode in walls:
+                continue
 
             children.append(newNode)
 
         for child in children:
+            # If the child is in closedSet, we skip it
             if child in closedSet:
                 continue
 
@@ -119,15 +119,15 @@ def findPath(board, walls, squares, start, end):
             child.f = child.g + child.h
 
             # Dont think that this is the cleanest way to do this but I think it works
-            # If the child is in openSet and its g value is greater than openNode, make it a child
-            check = 0
+            # If the child is in openSet and its g value is greater than openNode, add it to closed set
+            # Then check again to see if the child is in closedSet, and pass if it is
             for openNode in openSet:
                 if child == openNode and child.g > openNode.g:
-                    check +=1
-            if check == 1:
-                check = 0
+                    closedSet.append(child)
+            if child in closedSet:
                 continue
-
+                
+            # If the child passes the above tests, add it to open set
             openSet.append(child)
 
 def drawSearch(board,squareLength,path):
@@ -151,9 +151,6 @@ def run(length,squares):
 
     cv2.imshow('Howdy',board)
     cv2.waitKey(0)
-    # k = cv2.waitKey(0) & 0xff
-    # if k == 27:
-    #     return
 
 if __name__ == "__main__":
-    run(800,20)
+    run(500,50)
