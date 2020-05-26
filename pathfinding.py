@@ -8,7 +8,7 @@ class Square(object):
         self.position = position
         self.isWall = False
         # Sets a percentage of the squares to be walls at random
-        if np.random.rand(1) < 0.3:
+        if np.random.rand(1) < 0.5:
             self.isWall = True
         self.f = 0
         self.g = 0
@@ -77,6 +77,7 @@ def findPath(board, walls, squares, start, end):
                 currentNode = node
                 currentIndex = index
         openSet.pop(currentIndex)
+        print(currentNode.position)
         closedSet.append(currentNode)
 
         children = []
@@ -99,16 +100,8 @@ def findPath(board, walls, squares, start, end):
             if nodePosition[0] > (squares-1) or nodePosition[0] < 0 or nodePosition[1] > (squares-1) or nodePosition[1] < 0:
                 continue
 
-            # How do I fix this?
-            # The walls are taken from the board creation
-            # Right now I am looking through all the walls individually to check for a match with the currentNode
-            # If there is a match then the square will be ignored since the path cant include walls
-            a = 0
-            for wall in walls:
-                if currentNode == wall:
-                    a += 1
-            if a == 1:
-                a = 0
+            # If the currentNode is a wall, ignore it and move on
+            if currentNode in walls:
                 continue
 
             # If an adjacent square passes the two tests, make it a child of the currentNode
@@ -117,18 +110,23 @@ def findPath(board, walls, squares, start, end):
             children.append(newNode)
 
         for child in children:
-            for kid in closedSet:
-                if child == kid:
-                    continue
+            if child in closedSet:
+                continue
 
             # Heuristic takes the euclidian distance to select the square closest to the end
             child.g = currentNode.g + 1
             child.h = math.dist((child.position[0],child.position[1]),(end.position[0],end.position[1]))
             child.f = child.g + child.h
 
+            # Dont think that this is the cleanest way to do this but I think it works
+            # If the child is in openSet and its g value is greater than openNode, make it a child
+            check = 0
             for openNode in openSet:
                 if child == openNode and child.g > openNode.g:
-                    continue
+                    check +=1
+            if check == 1:
+                check = 0
+                continue
 
             openSet.append(child)
 
@@ -158,4 +156,4 @@ def run(length,squares):
     #     return
 
 if __name__ == "__main__":
-    run(800,10)
+    run(800,20)
